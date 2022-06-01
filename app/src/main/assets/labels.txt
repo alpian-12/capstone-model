@@ -1,49 +1,49 @@
-mie goreng
-pempek
-nasi goreng
-gado-gado
-rawon
-bebek betutu
-sate
-bakso
-gudeg
-rendang
-kimchi
-tteokbokki
-hotteok
-oden
-jjangmyeon
-kimbab
-sushi
-ramen
-udon
-tamagoyaki
-tofu
-onigiri
-tempura
-yakitori
-biryani
-jalebi
-samosa
-laddu
-kulfi
-pizza
-bakpao
-capcay
-siomay
-fu yung hai
-roti maryam
-kebab
-sambosa
-musakhan
-bubur ayam
 aseeda
-tiramisu
-kue keranjang
-nasi hainam
-manggo sticky rice
+bakpao
+bakso
+bbopki
+bebek betutu
+biryani
+bubur ayam
+capcay
+fu yung hai
+gado-gado
+gudeg
+hotteok
+jalebi
+jjangmyeon
+kebab
 kerak telor
+kimbab
+kimchi
+kue keranjang
+kulfi
+laddu
 lumpia
-nasi padang
-soto
 mandu
+manggo sticky rice
+mie goreng
+musakhan
+nasi goreng
+nasi hainam
+oden
+onigiri
+pempek
+pizza
+ramen
+rawon
+rendang
+roti maryam
+sambosa
+samosa
+sate
+siomay
+soto
+sushi
+tamagoyaki
+tempura
+tiramisu
+tofu
+tteokbokki
+udon
+yakitori

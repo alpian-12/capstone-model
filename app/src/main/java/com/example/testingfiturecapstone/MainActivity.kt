@@ -95,12 +95,12 @@ class MainActivity : AppCompatActivity() {
         val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
         val labels = label.split("\n")
         val model = OnigiriModel.newInstance(this)
-        var bitmap = bitmap
-        bitmap = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
+        var bitmapscale = Bitmap.createBitmap(bitmap)
+        bitmapscale = Bitmap.createScaledBitmap(bitmapscale, 224, 224, true)
 // Creates inputs for reference.
         val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
         val tensorImage = TensorImage(DataType.FLOAT32)
-        tensorImage.load(bitmap)
+        tensorImage.load(bitmapscale)
 
         val byteBuffer = tensorImage.buffer
         Log.d("shape", byteBuffer.toString())
@@ -113,7 +113,8 @@ class MainActivity : AppCompatActivity() {
 
         // Releases model resources if no longer used.
         var max = getMax(outputFeature0.floatArray,outputFeature0.floatArray.size)
-
+        Log.e( "outputGenerator: ","-----------------------" )
+        Log.e("outputGenerator: ",outputFeature0.floatArray.toList().toString() )
         Log.e("outputGenerator: ",max.toString() )
         Log.e("outputGenerator: ", outputFeature0.floatArray.size.toString())
         tvOutput.setText(labels[max])
