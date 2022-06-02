@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             bitmap =
                 BitmapFactory.decodeStream(contentResolver.openInputStream(selectedImg))
             bitmap = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
-            imageView.setImageBitmap(bitmap)
+
 
         }
     }
@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity() {
     private val takePicturePreview =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { it ->
             if (it != null) {
-                imageView.setImageBitmap(it)
+
                 bitmap = Bitmap.createScaledBitmap(it, 224, 224, true)
 
 
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
         val labels = label.split("\n")
         val model = OnigiriModel.newInstance(this)
         var bitmapscale = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
-
+        imageView.setImageBitmap(bitmapscale)
 // Creates inputs for reference.
         val inputFeature0 =
             TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity() {
 
         var tbuffer = TensorImage.fromBitmap(resized)
         var byteBuffer = tbuffer.buffer
-
+        imageView.setImageBitmap(resized)
 // Creates inputs for reference.
         val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.UINT8)
         inputFeature0.loadBuffer(byteBuffer)
@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity() {
             .probabilityAsCategoryList.apply {
                 sortByDescending { it.score }
             }
-
+        imageView.setImageBitmap(newBitmap)
         //getting result having high probability
         val highProbabilityOutput = outputs[0]
 
@@ -211,3 +211,4 @@ class MainActivity : AppCompatActivity() {
         return ind
     }
 }
+
