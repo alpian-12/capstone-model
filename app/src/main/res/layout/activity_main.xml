@@ -19,7 +19,7 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="300dp"
-        android:layout_height="450dp"
+        android:layout_height="350dp"
         android:layout_marginTop="16dp"
         android:src="@drawable/ic_launcher_background"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,25 +54,34 @@
         android:id="@+id/another_predict"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:text="another_predict"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.407"
         app:layout_constraintStart_toStartOf="@id/guideline2"
         app:layout_constraintTop_toBottomOf="@+id/btn_capture_image" />
 
+    <Button
+        android:id="@+id/another_predict_food"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="food category"
+        app:layout_constraintEnd_toEndOf="@+id/another_predict"
+        app:layout_constraintStart_toStartOf="@+id/predict_onigiri"
+        app:layout_constraintTop_toBottomOf="@+id/predict_onigiri" />
+
+
     <TextView
         android:id="@+id/textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="20dp"
         android:text="Output: "
         android:textColor="@android:color/black"
         android:textSize="21sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/predict_onigiri" />
-
+        app:layout_constraintTop_toBottomOf="@+id/another_predict_food" />
 
     <TextView
         android:id="@+id/tv_output"
@@ -80,12 +89,12 @@
         android:layout_height="wrap_content"
 
         android:layout_marginStart="8dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:text="Result here"
         android:textColor="@android:color/holo_red_dark"
         android:textSize="21sp"
         app:layout_constraintStart_toEndOf="@id/textview"
-        app:layout_constraintTop_toBottomOf="@+id/another_predict" />
+        app:layout_constraintTop_toBottomOf="@+id/another_predict_food" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"

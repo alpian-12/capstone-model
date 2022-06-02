@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.testingfiturecapstone.databinding.ActivityMainBinding
+import com.example.testingfiturecapstone.ml.LiteModelAiyVisionClassifierFoodV11
 import com.example.testingfiturecapstone.ml.MobilenetV110224Quant
 import com.example.testingfiturecapstone.ml.OnigiriModel
 import org.tensorflow.lite.DataType
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var button: Button
     private lateinit var buttononigiri: Button
     private lateinit var buttonpredict: Button
+    private lateinit var buttonfoodcategory: Button
     private lateinit var tvOutput: TextView
     private val GALLERY_REQUEST_CODE = 123
     lateinit var bitmap: Bitmap
@@ -54,11 +56,15 @@ class MainActivity : AppCompatActivity() {
         }
         buttononigiri = binding.predictOnigiri
         buttonpredict = binding.anotherPredict
+        buttonfoodcategory = binding.anotherPredictFood
         buttononigiri.setOnClickListener {
             outputGeneratoronigiri(bitmap)
         }
         buttonpredict.setOnClickListener {
             outputGeneratormobile(bitmap)
+        }
+        buttonfoodcategory.setOnClickListener {
+            outputGeneratorcategoryfood(bitmap)
         }
 
     }
@@ -155,7 +161,7 @@ class MainActivity : AppCompatActivity() {
         val outputs = model.process(inputFeature0)
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer
 
-        var max = getMax(outputFeature0.floatArray,1000)
+        var max = getMax(outputFeature0.floatArray, 1000)
 
         tvOutput.text = labels[max]
 
@@ -163,6 +169,29 @@ class MainActivity : AppCompatActivity() {
         model.close()
     }
 
+    private fun outputGeneratorcategoryfood(bitmap: Bitmap) {
+        //declearing tensor flow lite model variable
+
+        val birdsModel = LiteModelAiyVisionClassifierFoodV11.newInstance(this)
+
+        // converting bitmap into tensor flow image
+        val newBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val tfimage = TensorImage.fromBitmap(newBitmap)
+
+        //process the image using trained model and sort it in descending order
+        val outputs = birdsModel.process(tfimage)
+            .probabilityAsCategoryList.apply {
+                sortByDescending { it.score }
+            }
+
+        //getting result having high probability
+        val highProbabilityOutput = outputs[0]
+
+        //setting ouput text
+        tvOutput.text = highProbabilityOutput.label
+        Log.i("TAG", "outputGenerator: $highProbabilityOutput")
+
+    }
 
     fun getMax(arr: FloatArray, size: Int): Int {
         var ind = 0;
