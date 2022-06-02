@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.testingfiturecapstone.databinding.ActivityMainBinding
+import com.example.testingfiturecapstone.ml.MobilenetV110224Quant
 import com.example.testingfiturecapstone.ml.OnigiriModel
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.image.TensorImage
@@ -24,9 +25,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var imageView: ImageView
     private lateinit var button: Button
+    private lateinit var buttononigiri: Button
+    private lateinit var buttonpredict: Button
     private lateinit var tvOutput: TextView
     private val GALLERY_REQUEST_CODE = 123
-
+    lateinit var bitmap: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +52,14 @@ class MainActivity : AppCompatActivity() {
         buttonLoad.setOnClickListener {
             startGallery()
         }
-
+        buttononigiri = binding.predictOnigiri
+        buttonpredict = binding.anotherPredict
+        buttononigiri.setOnClickListener {
+            outputGeneratoronigiri(bitmap)
+        }
+        buttonpredict.setOnClickListener {
+            outputGeneratormobile(bitmap)
+        }
 
     }
 
@@ -67,10 +77,11 @@ class MainActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val selectedImg: Uri = result.data?.data as Uri
 //data image
-            val bitmap =
+            bitmap =
                 BitmapFactory.decodeStream(contentResolver.openInputStream(selectedImg))
+            bitmap = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
             imageView.setImageBitmap(bitmap)
-            outputGenerator(bitmap)
+
         }
     }
     private val requestPermission =
@@ -84,21 +95,26 @@ class MainActivity : AppCompatActivity() {
 
     //launch camera and take picture
     private val takePicturePreview =
-        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            if (bitmap != null) {
-                imageView.setImageBitmap(bitmap)
-                outputGenerator(bitmap)
+        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { it ->
+            if (it != null) {
+                imageView.setImageBitmap(it)
+                bitmap = Bitmap.createScaledBitmap(it, 224, 224, true)
+
+
             }
         }
-    private fun outputGenerator(bitmap: Bitmap) {
+
+
+    private fun outputGeneratoronigiri(bitmap: Bitmap) {
         val name_file = "labels.txt"
         val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
         val labels = label.split("\n")
         val model = OnigiriModel.newInstance(this)
-        var bitmapscale = Bitmap.createBitmap(bitmap)
-        bitmapscale = Bitmap.createScaledBitmap(bitmapscale, 224, 224, true)
+        var bitmapscale = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
+
 // Creates inputs for reference.
-        val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
+        val inputFeature0 =
+            TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
         val tensorImage = TensorImage(DataType.FLOAT32)
         tensorImage.load(bitmapscale)
 
@@ -112,26 +128,52 @@ class MainActivity : AppCompatActivity() {
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer
 
         // Releases model resources if no longer used.
-        var max = getMax(outputFeature0.floatArray,outputFeature0.floatArray.size)
-        Log.e( "outputGenerator: ","-----------------------" )
-        Log.e("outputGenerator: ",outputFeature0.floatArray.toList().toString() )
-        Log.e("outputGenerator: ",max.toString() )
+        var max = getMax(outputFeature0.floatArray, outputFeature0.floatArray.size)
+        Log.e("outputGenerator: ", "-----------------------")
+        Log.e("outputGenerator: ", outputFeature0.floatArray.toList().toString())
+        Log.e("outputGenerator: ", max.toString())
         Log.e("outputGenerator: ", outputFeature0.floatArray.size.toString())
-        tvOutput.setText(labels[max])
+        tvOutput.text = labels[max]
         model.close()
     }
-    fun getMax(arr: FloatArray, size: Int) : Int{
+
+    private fun outputGeneratormobile(bitmap: Bitmap) {
+        val name_file = "label.txt"
+        val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
+        val labels = label.split("\n")
+        var resized = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
+        val model = MobilenetV110224Quant.newInstance(this)
+
+        var tbuffer = TensorImage.fromBitmap(resized)
+        var byteBuffer = tbuffer.buffer
+
+// Creates inputs for reference.
+        val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.UINT8)
+        inputFeature0.loadBuffer(byteBuffer)
+
+// Runs model inference and gets result.
+        val outputs = model.process(inputFeature0)
+        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+
+        var max = getMax(outputFeature0.floatArray,1000)
+
+        tvOutput.text = labels[max]
+
+// Releases model resources if no longer used.
+        model.close()
+    }
+
+
+    fun getMax(arr: FloatArray, size: Int): Int {
         var ind = 0;
         var min = 0.0f;
 
-        for(i in 0 until size)
-        {
-            Log.e("get: ",i.toString() )
-            Log.e("get i: ",arr[i].toString() )
-            if(arr[i] > min)
-            {
-                Log.e("getMax: ",i.toString() )
-                Log.e("getMax: ",arr[i].toString() )
+        for (i in 0 until size) {
+            Log.e("get: ", i.toString())
+            Log.e("get i: ", arr[i].toString())
+            if (arr[i] > min) {
+                Log.e("getMax: ", i.toString())
+                Log.e("getMax: ", arr[i].toString())
 
                 min = arr[i]
                 ind = i;
