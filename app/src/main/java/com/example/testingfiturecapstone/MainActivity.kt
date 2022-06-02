@@ -19,6 +19,8 @@ import com.example.testingfiturecapstone.ml.LiteModelAiyVisionClassifierFoodV11
 import com.example.testingfiturecapstone.ml.MobilenetV110224Quant
 import com.example.testingfiturecapstone.ml.OnigiriModel
 import org.tensorflow.lite.DataType
+import org.tensorflow.lite.schema.TensorType.UINT8
+import org.tensorflow.lite.schema.Uint8Vector
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity() {
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val selectedImg: Uri = result.data?.data as Uri
-//data image
+            //data image
             bitmap =
                 BitmapFactory.decodeStream(contentResolver.openInputStream(selectedImg))
             bitmap = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
@@ -118,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         val model = OnigiriModel.newInstance(this)
         var bitmapscale = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
         imageView.setImageBitmap(bitmapscale)
-// Creates inputs for reference.
+        // Creates inputs for reference.
         val inputFeature0 =
             TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
         val tensorImage = TensorImage(DataType.FLOAT32)
@@ -133,16 +135,31 @@ class MainActivity : AppCompatActivity() {
         val outputs = model.process(inputFeature0)
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer
 
-        // Releases model resources if no longer used.
+
+//        var buffer = new ArrayBuffer(data.byteLength);
+//        var buffer1 = ArrayBuffer(outputFeature0.floatArray.size)
+//        var floatView = new Float32Array(buffer).set(data);
+//        var byteView = new Uint8Array(buffer);
+//        convertTypedArray()
+
+var bytearray =  outputFeature0.floatArray.toTypedArray()
+        // Releases model resources if  no longer used.
         var max = getMax(outputFeature0.floatArray, outputFeature0.floatArray.size)
         Log.e("outputGenerator: ", "-----------------------")
         Log.e("outputGenerator: ", outputFeature0.floatArray.toList().toString())
         Log.e("outputGenerator: ", max.toString())
         Log.e("outputGenerator: ", outputFeature0.floatArray.size.toString())
+        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
+        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
         tvOutput.text = labels[max]
         model.close()
     }
 
+//    fun convertTypedArray(src, type) {
+//        var buffer = new ArrayBuffer(src.byteLength);
+//        var baseView = new src.constructor(buffer).set(src);
+//        return new type(buffer);
+//    }
     private fun outputGeneratormobile(bitmap: Bitmap) {
         val name_file = "label.txt"
         val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
@@ -153,19 +170,20 @@ class MainActivity : AppCompatActivity() {
         var tbuffer = TensorImage.fromBitmap(resized)
         var byteBuffer = tbuffer.buffer
         imageView.setImageBitmap(resized)
-// Creates inputs for reference.
+        // Creates inputs for reference.
         val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.UINT8)
         inputFeature0.loadBuffer(byteBuffer)
 
-// Runs model inference and gets result.
+        // Runs model inference and gets result.
         val outputs = model.process(inputFeature0)
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer
-
+        Log.e("outputGenerator: ", "-----------------------")
+        Log.e("outputGenerator: ", outputFeature0.floatArray.toList().toString())
         var max = getMax(outputFeature0.floatArray, 1000)
 
         tvOutput.text = labels[max]
 
-// Releases model resources if no longer used.
+        // Releases model resources if no longer used.
         model.close()
     }
 
@@ -198,8 +216,8 @@ class MainActivity : AppCompatActivity() {
         var min = 0.0f;
 
         for (i in 0 until size) {
-            Log.e("get: ", i.toString())
-            Log.e("get i: ", arr[i].toString())
+//            Log.e("get: ", i.toString())
+//            Log.e("get i: ", arr[i].toString())
             if (arr[i] > min) {
                 Log.e("getMax: ", i.toString())
                 Log.e("getMax: ", arr[i].toString())
