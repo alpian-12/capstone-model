@@ -61,15 +61,26 @@
         app:layout_constraintStart_toStartOf="@id/guideline2"
         app:layout_constraintTop_toBottomOf="@+id/btn_capture_image" />
 
+
     <Button
         android:id="@+id/another_predict_food"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text="food category"
-        app:layout_constraintEnd_toEndOf="@+id/another_predict"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/predict_onigiri"
         app:layout_constraintTop_toBottomOf="@+id/predict_onigiri" />
 
+    <Button
+        android:id="@+id/deases"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+
+        android:text="deasescategory"
+        app:layout_constraintEnd_toEndOf="@+id/another_predict"
+        app:layout_constraintTop_toBottomOf="@+id/another_predict" />
 
     <TextView
         android:id="@+id/textview"

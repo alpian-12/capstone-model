@@ -15,9 +15,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.example.testingfiturecapstone.databinding.ActivityMainBinding
-import com.example.testingfiturecapstone.ml.LiteModelAiyVisionClassifierFoodV11
-import com.example.testingfiturecapstone.ml.MobilenetV110224Quant
-import com.example.testingfiturecapstone.ml.OnigiriModel
+import com.example.testingfiturecapstone.ml.*
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.schema.TensorType.UINT8
 import org.tensorflow.lite.schema.Uint8Vector
@@ -31,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttononigiri: Button
     private lateinit var buttonpredict: Button
     private lateinit var buttonfoodcategory: Button
+    private lateinit var deasesbutton: Button
     private lateinit var tvOutput: TextView
     private val GALLERY_REQUEST_CODE = 123
     lateinit var bitmap: Bitmap
@@ -43,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         imageView = binding.imageView
         button = binding.btnCaptureImage
         tvOutput = binding.tvOutput
+        deasesbutton = binding.deases
         val buttonLoad = binding.btnLoadImage
         button.setOnClickListener {
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
@@ -68,8 +68,47 @@ class MainActivity : AppCompatActivity() {
         buttonfoodcategory.setOnClickListener {
             outputGeneratorcategoryfood(bitmap)
         }
+        deasesbutton.setOnClickListener {
+            outputGeneratorcategorydeases(bitmap)
+        }
 
     }
+
+    private fun outputGeneratorcategorydeases(bitmap: Bitmap){
+        val name_file = "labels.txt"
+        val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
+        val labels = label.split("\n")
+        val model = Model.newInstance(this)
+        var bitmapscale = Bitmap.createScaledBitmap(bitmap, 150, 150, true)
+        imageView.setImageBitmap(bitmapscale)
+        // Creates inputs for reference.
+        val inputFeature0 =
+            TensorBuffer.createFixedSize(intArrayOf(1, 150, 150, 3), DataType.FLOAT32)
+        val tensorImage = TensorImage(DataType.FLOAT32)
+        tensorImage.load(bitmapscale)
+
+        val byteBuffer = tensorImage.buffer
+        Log.d("shape", byteBuffer.toString())
+        Log.d("shape", inputFeature0.buffer.toString())
+        inputFeature0.loadBuffer(byteBuffer)
+
+        // Runs model inference and gets result.
+        val outputs = model.process(inputFeature0)
+        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+
+
+        val max = getMax(outputFeature0.floatArray, outputFeature0.floatArray.size)
+        Log.e("outputGenerator: ", "-----------------------")
+        Log.e("outputGenerator: ", outputFeature0.floatArray.toList().toString())
+        Log.e("outputGenerator: ", max.toString())
+        Log.e("outputGenerator: ", outputFeature0.floatArray.size.toString())
+        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
+        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
+        tvOutput.text = labels[max]
+        model.close()
+    }
+
+
 
     private fun startGallery() {
         val intent = Intent()
@@ -112,12 +151,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
     private fun outputGeneratoronigiri(bitmap: Bitmap) {
         val name_file = "labels.txt"
         val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
         val labels = label.split("\n")
-        val model = OnigiriModel.newInstance(this)
+        val model = Model1654305306.newInstance(this)
         var bitmapscale = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
         imageView.setImageBitmap(bitmapscale)
         // Creates inputs for reference.
@@ -136,15 +174,7 @@ class MainActivity : AppCompatActivity() {
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer
 
 
-//        var buffer = new ArrayBuffer(data.byteLength);
-//        var buffer1 = ArrayBuffer(outputFeature0.floatArray.size)
-//        var floatView = new Float32Array(buffer).set(data);
-//        var byteView = new Uint8Array(buffer);
-//        convertTypedArray()
-
-var bytearray =  outputFeature0.floatArray.toTypedArray()
-        // Releases model resources if  no longer used.
-        var max = getMax(outputFeature0.floatArray, outputFeature0.floatArray.size)
+        val max = getMax(outputFeature0.floatArray, outputFeature0.floatArray.size)
         Log.e("outputGenerator: ", "-----------------------")
         Log.e("outputGenerator: ", outputFeature0.floatArray.toList().toString())
         Log.e("outputGenerator: ", max.toString())
@@ -155,20 +185,15 @@ var bytearray =  outputFeature0.floatArray.toTypedArray()
         model.close()
     }
 
-//    fun convertTypedArray(src, type) {
-//        var buffer = new ArrayBuffer(src.byteLength);
-//        var baseView = new src.constructor(buffer).set(src);
-//        return new type(buffer);
-//    }
     private fun outputGeneratormobile(bitmap: Bitmap) {
         val name_file = "label.txt"
         val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
         val labels = label.split("\n")
-        var resized = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
+        val resized = Bitmap.createScaledBitmap(bitmap, 224, 224, true)
         val model = MobilenetV110224Quant.newInstance(this)
 
-        var tbuffer = TensorImage.fromBitmap(resized)
-        var byteBuffer = tbuffer.buffer
+        val tbuffer = TensorImage.fromBitmap(resized)
+        val byteBuffer = tbuffer.buffer
         imageView.setImageBitmap(resized)
         // Creates inputs for reference.
         val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.UINT8)
