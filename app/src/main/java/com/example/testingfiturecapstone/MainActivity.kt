@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -21,6 +22,8 @@ import org.tensorflow.lite.schema.TensorType.UINT8
 import org.tensorflow.lite.schema.Uint8Vector
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -31,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonfoodcategory: Button
     private lateinit var deasesbutton: Button
     private lateinit var tvOutput: TextView
-    private val GALLERY_REQUEST_CODE = 123
+//    private val GALLERY_REQUEST_CODE = 123
     lateinit var bitmap: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,38 +77,66 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun outputGeneratorcategorydeases(bitmap: Bitmap){
+    private fun outputGeneratorcategorydeases(bitmapinput: Bitmap){
         val name_file = "labels.txt"
         val label = application.assets.open(name_file).bufferedReader().use { it.readText() }
         val labels = label.split("\n")
+
+
         val model = Model.newInstance(this)
-        var bitmapscale = Bitmap.createScaledBitmap(bitmap, 150, 150, true)
-        imageView.setImageBitmap(bitmapscale)
+        val bitmap = Bitmap.createScaledBitmap(bitmapinput, 150, 150, true)
+        val input = ByteBuffer.allocateDirect(150*150*3*4).order(ByteOrder.nativeOrder())
+        for (y in 0 until 150) {
+            for (x in 0 until 150) {
+                val px = bitmap.getPixel(x, y)
+
+                // Get channel values from the pixel value.
+                val r = Color.red(px)
+                val g = Color.green(px)
+                val b = Color.blue(px)
+
+                // Normalize channel values to [-1.0, 1.0]. This requirement depends on the model.
+                // For example, some models might require values to be normalized to the range
+                // [0.0, 1.0] instead.
+                val rf = (r - 127) / 255f
+                val gf = (g - 127) / 255f
+                val bf = (b - 127) / 255f
+
+                input.putFloat(rf)
+                input.putFloat(gf)
+                input.putFloat(bf)
+            }
+        }
+        imageView.setImageBitmap(bitmap)
+
+
+
         // Creates inputs for reference.
         val inputFeature0 =
             TensorBuffer.createFixedSize(intArrayOf(1, 150, 150, 3), DataType.FLOAT32)
         val tensorImage = TensorImage(DataType.FLOAT32)
-        tensorImage.load(bitmapscale)
+//        tensorImage.load()
 
-        val byteBuffer = tensorImage.buffer
-        Log.d("shape", byteBuffer.toString())
+//        val byteBuffer = tensorImage.buffer
+        Log.d("shape", input.toString())
         Log.d("shape", inputFeature0.buffer.toString())
-        inputFeature0.loadBuffer(byteBuffer)
+//        inputFeature0.loadBuffer(input)
 
-        // Runs model inference and gets result.
-        val outputs = model.process(inputFeature0)
-        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
-
-
-        val max = getMax(outputFeature0.floatArray, outputFeature0.floatArray.size)
-        Log.e("outputGenerator: ", "-----------------------")
-        Log.e("outputGenerator: ", outputFeature0.floatArray.toList().toString())
-        Log.e("outputGenerator: ", max.toString())
-        Log.e("outputGenerator: ", outputFeature0.floatArray.size.toString())
-        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
-        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
-        tvOutput.text = labels[max]
+//        // Runs model inference and gets result.
+//        val outputs = model.process(inputFeature0)
+//        val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+//
+//
+//        val max = getMax(outputFeature0.floatArray, outputFeature0.floatArray.size)
+//        Log.e("outputGenerator: ", "-----------------------")
+//        Log.e("outputGenerator: ", outputFeature0.floatArray.toList().toString())
+//        Log.e("outputGenerator: ", max.toString())
+//        Log.e("outputGenerator: ", outputFeature0.floatArray.size.toString())
+//        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
+//        Log.e("outputGenerator: ", outputFeature0.dataType.toString())
+//        tvOutput.text = labels[max]
         model.close()
+
     }
 
 
